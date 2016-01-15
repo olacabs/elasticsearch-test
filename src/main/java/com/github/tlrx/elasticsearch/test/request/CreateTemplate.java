@@ -18,17 +18,17 @@
  */
 package com.github.tlrx.elasticsearch.test.request;
 
-import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
-import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
+import java.util.Map;
+
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateAction;
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateRequest;
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 
-import java.util.Map;
+import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
+import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 
 /**
  * A {@link Request} used to create indices templates.
@@ -54,7 +54,7 @@ public class CreateTemplate implements Request<Void> {
     }
 
     public CreateTemplate withSettings(String source) {
-        Settings settings = ImmutableSettings.settingsBuilder()
+        Settings settings = Settings.settingsBuilder()
                 .loadFromSource(source)
                 .build();
         withSettings(settings);

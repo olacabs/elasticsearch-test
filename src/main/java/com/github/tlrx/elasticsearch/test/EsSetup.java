@@ -18,11 +18,24 @@
  */
 package com.github.tlrx.elasticsearch.test;
 
-import com.github.tlrx.elasticsearch.test.provider.*;
-import com.github.tlrx.elasticsearch.test.request.*;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.Preconditions;
 import org.elasticsearch.common.settings.Settings;
+
+import com.github.tlrx.elasticsearch.test.provider.ClassPathJSONProvider;
+import com.github.tlrx.elasticsearch.test.provider.ClientProvider;
+import com.github.tlrx.elasticsearch.test.provider.DefaultClientProvider;
+import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
+import com.github.tlrx.elasticsearch.test.provider.LocalClientProvider;
+import com.github.tlrx.elasticsearch.test.request.Count;
+import com.github.tlrx.elasticsearch.test.request.CreateIndex;
+import com.github.tlrx.elasticsearch.test.request.CreateTemplate;
+import com.github.tlrx.elasticsearch.test.request.Delete;
+import com.github.tlrx.elasticsearch.test.request.DeleteIndices;
+import com.github.tlrx.elasticsearch.test.request.DeleteTemplates;
+import com.github.tlrx.elasticsearch.test.request.Exists;
+import com.github.tlrx.elasticsearch.test.request.Index;
+import com.github.tlrx.elasticsearch.test.request.Request;
+import com.google.common.base.Preconditions;
 
 /**
  * This class aims to simplify the ElasticSearch setup for unit testing. It allows to start and stop an embedded local

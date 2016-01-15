@@ -3,18 +3,20 @@
  */
 package com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations;
 
-import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchTransportClient;
-import com.github.tlrx.elasticsearch.test.support.junit.handlers.ClassLevelElasticsearchAnnotationHandler;
-import com.github.tlrx.elasticsearch.test.support.junit.handlers.FieldLevelElasticsearchAnnotationHandler;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchTransportClient;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.ClassLevelElasticsearchAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.FieldLevelElasticsearchAnnotationHandler;
 
 /**
  * Handle {@link ElasticsearchTransportClient} annotation
@@ -33,15 +35,20 @@ public class ElasticsearchTransportClientAnnotationHandler implements ClassLevel
         ElasticsearchTransportClient elasticsearchTransportClient = (ElasticsearchTransportClient) annotation;
 
         // Settings
-        Settings settings = ImmutableSettings.settingsBuilder()
+        Settings settings = Settings.settingsBuilder()
                 .put("cluster.name", String.valueOf(elasticsearchTransportClient.clusterName()))
                 .build();
 
-        TransportClient client = new TransportClient(settings);
+        TransportClient client = TransportClient.builder().settings(settings).build();
 
         int n = 0;
         for (String host : elasticsearchTransportClient.hostnames()) {
-            client.addTransportAddress(new InetSocketTransportAddress(host, elasticsearchTransportClient.ports()[n++]));
+            try {
+	            client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), elasticsearchTransportClient.ports()[n++]));
+          
+            } catch (UnknownHostException e) {
+	            throw new RuntimeException("Not able to get InetAddress by host : "  + host);
+            }
         }
 
         if (client != null) {

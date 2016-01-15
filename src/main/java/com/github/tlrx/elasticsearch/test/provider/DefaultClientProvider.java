@@ -19,8 +19,9 @@
 package com.github.tlrx.elasticsearch.test.provider;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.Preconditions;
 import org.elasticsearch.common.unit.TimeValue;
+
+import com.google.common.base.Preconditions;
 
 /**
  * DefaultClientProvider uses a given {@link Client} instance. This provider is useful when the client is instantiated

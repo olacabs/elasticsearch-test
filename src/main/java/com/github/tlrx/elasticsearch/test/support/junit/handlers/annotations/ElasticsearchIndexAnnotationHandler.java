@@ -3,8 +3,13 @@
  */
 package com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations;
 
-import com.github.tlrx.elasticsearch.test.annotations.*;
-import com.github.tlrx.elasticsearch.test.support.junit.handlers.MethodLevelElasticsearchAnnotationHandler;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -12,18 +17,24 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.ImmutableSettings.Builder;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.QueryBuilders;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchAnalysis;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchAnalyzer;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchFilter;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchIndex;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchMapping;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchMappingField;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchMappingSubField;
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchSetting;
+import com.github.tlrx.elasticsearch.test.annotations.Index;
+import com.github.tlrx.elasticsearch.test.annotations.TermVector;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.MethodLevelElasticsearchAnnotationHandler;
 
 /**
  * Handle {@link ElasticsearchIndex} annotation
@@ -60,9 +71,20 @@ public class ElasticsearchIndexAnnotationHandler extends AbstractAnnotationHandl
      * @throws ElasticsearchException
      */
     private void clean(Map<String, Object> context, String nodeName, String indexName) throws ElasticsearchException, Exception {
-        client(context, nodeName).prepareDeleteByQuery(indexName)
-                .setQuery(QueryBuilders.matchAllQuery())
-                .execute().actionGet();
+//        client(context, nodeName).prepareDeleteByQuery(indexName)
+//                .setQuery(QueryBuilders.matchAllQuery())
+//                .execute().actionGet();
+    	
+    	Client client = client(context, nodeName);
+    	DeleteIndexResponse response = client.admin().indices().prepareDelete(indexName).execute().actionGet();
+        if (!response.isAcknowledged()) {
+            throw new Exception("Could not delete index [" + indexName + "]");
+        }
+        
+        CreateIndexResponse createResponse = admin(context, nodeName).indices().prepareCreate(indexName).execute().actionGet();
+        if (!createResponse.isAcknowledged()) {
+            throw new Exception("Could not create index [" + indexName + "]");
+        }
     }
 
     /**
@@ -168,7 +190,7 @@ public class ElasticsearchIndexAnnotationHandler extends AbstractAnnotationHandl
     private Settings buildIndexSettings(ElasticsearchIndex elasticsearchIndex) {
 
         // Build default settings
-        Builder settingsBuilder = ImmutableSettings.settingsBuilder();
+        Builder settingsBuilder = Settings.settingsBuilder();
 
         String settingsFile = "config/mappings/" + elasticsearchIndex.indexName() + "/_settings.json";
         if (elasticsearchIndex.settingsFile().length() > 0) {
@@ -176,7 +198,9 @@ public class ElasticsearchIndexAnnotationHandler extends AbstractAnnotationHandl
         }
 
         // Loads settings from settings file
-        Settings configSettings = ImmutableSettings.settingsBuilder().loadFromClasspath(settingsFile).build();
+        Path path = Paths.get(settingsFile);
+        Settings configSettings = Settings.settingsBuilder().loadFromStream(path.getFileName().toString(), 
+        		getClass().getClassLoader().getResourceAsStream(settingsFile)).build();
         settingsBuilder.put(configSettings);
 
         // Manage analysis filters & tokenizers

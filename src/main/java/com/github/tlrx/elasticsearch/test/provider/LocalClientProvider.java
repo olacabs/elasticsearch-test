@@ -19,26 +19,32 @@
 package com.github.tlrx.elasticsearch.test.provider;
 
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Logger;
+
+import org.apache.lucene.util.IOUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.io.FileSystemUtils;
-import org.elasticsearch.common.network.NetworkUtils;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 
-import java.io.File;
-
 /**
  * LocalClientProvider instantiates a local node with in-memory index store type.
  */
 public class LocalClientProvider implements ClientProvider {
+	
+	private final static Logger LOGGER = Logger.getLogger(LocalClientProvider.class.getName());
 
     private Node node = null;
     private Client client = null;
     private Settings settings = null;
-
+    
     public LocalClientProvider() {
     }
 
@@ -78,17 +84,30 @@ public class LocalClientProvider implements ClientProvider {
 
         if ((node != null) && (!node.isClosed())) {
             node.close();
-
-            FileSystemUtils.deleteRecursively(new File("./target/elasticsearch-test/"), true);
+            Path path = Paths.get("./target/elasticsearch-test/");
+            try {
+	            FileSystemUtils.deleteSubDirectories(path);
+	            IOUtils.rm(path);
+            } catch (IOException e) {
+            	LOGGER.warning("Not able to delete directory : target/elasticsearch-test/");
+            }
         }
     }
+    
 
     protected Settings buildNodeSettings() {
         // Build settings
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder()
+    	String hostname = "localhost";
+        try {
+	        hostname = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+        	LOGGER.warning("Not able to get hostname. Assigning default localhost");
+        }
+        
+        Settings.Builder builder = Settings.settingsBuilder()
                 .put("node.name", "node-test-" + System.currentTimeMillis())
                 .put("node.data", true)
-                .put("cluster.name", "cluster-test-" + NetworkUtils.getLocalAddress().getHostName())
+                .put("cluster.name", "cluster-test-" + hostname)
                 .put("index.store.type", "memory")
                 .put("index.store.fs.memory.enabled", "true")
                 .put("gateway.type", "none")

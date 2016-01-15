@@ -3,21 +3,23 @@
  */
 package com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+
+import org.apache.lucene.util.IOUtils;
+import org.elasticsearch.common.io.FileSystemUtils;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
+import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeBuilder;
+
 import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchNode;
 import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchSetting;
 import com.github.tlrx.elasticsearch.test.support.junit.handlers.ClassLevelElasticsearchAnnotationHandler;
 import com.github.tlrx.elasticsearch.test.support.junit.handlers.FieldLevelElasticsearchAnnotationHandler;
-import org.elasticsearch.common.io.FileSystemUtils;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.ImmutableSettings.Builder;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
-
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.Map;
 
 /**
  * Handle {@link ElasticsearchNode} annotation
@@ -59,7 +61,9 @@ public class ElasticsearchNodeAnnotationHandler implements ClassLevelElasticsear
                 }
             }
         }
-        FileSystemUtils.deleteRecursively(new File(ES_HOME));
+        Path path = Paths.get(ES_HOME);
+        FileSystemUtils.deleteSubDirectories(path);
+        IOUtils.rm(path);
     }
 
     public void handleField(Annotation annotation, Object instance, Map<String, Object> context, Field field) throws Exception {
@@ -108,7 +112,7 @@ public class ElasticsearchNodeAnnotationHandler implements ClassLevelElasticsear
     private Settings buildNodeSettings(ElasticsearchNode elasticsearchNode) {
 
         // Build default settings
-        Builder settingsBuilder = ImmutableSettings.settingsBuilder()
+        Builder settingsBuilder = Settings.settingsBuilder()
                 .put(NODE_NAME, elasticsearchNode.name())
                 .put("node.data", elasticsearchNode.data())
                 .put("cluster.name", elasticsearchNode.clusterName())
@@ -122,7 +126,9 @@ public class ElasticsearchNodeAnnotationHandler implements ClassLevelElasticsear
                 .put("index.number_of_replicas", "0");
 
         // Loads settings from configuration file
-        Settings configSettings = ImmutableSettings.settingsBuilder().loadFromClasspath(elasticsearchNode.configFile()).build();
+        Path path = Paths.get(elasticsearchNode.configFile());
+        Settings configSettings = Settings.settingsBuilder().loadFromStream(path.getFileName().toString(), 
+        		getClass().getClassLoader().getResourceAsStream(elasticsearchNode.configFile())).build();
         settingsBuilder.put(configSettings);
 
         // Other settings

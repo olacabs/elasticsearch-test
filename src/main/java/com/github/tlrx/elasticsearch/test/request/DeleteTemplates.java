@@ -18,7 +18,12 @@
  */
 package com.github.tlrx.elasticsearch.test.request;
 
-import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateAction;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateRequestBuilder;
@@ -27,13 +32,9 @@ import org.elasticsearch.action.admin.indices.template.delete.DeleteIndexTemplat
 import org.elasticsearch.action.admin.indices.template.delete.DeleteIndexTemplateRequest;
 import org.elasticsearch.action.admin.indices.template.delete.DeleteIndexTemplateResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.collect.Lists;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
+import com.google.common.collect.Lists;
 
 /**
  * A {@link com.github.tlrx.elasticsearch.test.request.Request} used to delete one, many templates or all templates.

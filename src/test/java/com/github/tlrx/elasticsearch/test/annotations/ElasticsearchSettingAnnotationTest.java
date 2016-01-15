@@ -1,6 +1,7 @@
 package com.github.tlrx.elasticsearch.test.annotations;
 
-import com.github.tlrx.elasticsearch.test.support.junit.runners.ElasticsearchRunner;
+import static org.junit.Assert.assertEquals;
+
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.client.AdminClient;
@@ -9,7 +10,7 @@ import org.elasticsearch.node.Node;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
+import com.github.tlrx.elasticsearch.test.support.junit.runners.ElasticsearchRunner;
 
 /**
  * Test class for {@link ElasticsearchSetting} annotation.
@@ -52,12 +53,12 @@ public class ElasticsearchSettingAnnotationTest {
         ClusterStateResponse response = adminClient.cluster().prepareState()
                 .execute().actionGet();
 
-        Settings indexSettings = response.getState().metaData().index("library").settings();
+        Settings indexSettings = response.getState().metaData().index("library").getSettings();
         assertEquals("2", indexSettings.get("index.number_of_shards"));
         assertEquals("1", indexSettings.get("index.number_of_replicas"));
 
         // Check default settings
-        indexSettings = response.getState().metaData().index("people").settings();
+        indexSettings = response.getState().metaData().index("people").getSettings();
         assertEquals("1", indexSettings.get("index.number_of_shards"));
         assertEquals("0", indexSettings.get("index.number_of_replicas"));
     }

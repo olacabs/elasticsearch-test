@@ -1,6 +1,11 @@
 package com.github.tlrx.elasticsearch.test.annotations;
 
-import com.github.tlrx.elasticsearch.test.support.junit.runners.ElasticsearchRunner;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
@@ -15,9 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 
-import java.io.IOException;
-
-import static org.junit.Assert.*;
+import com.github.tlrx.elasticsearch.test.support.junit.runners.ElasticsearchRunner;
 
 /**
  * Test class for {@link ElasticsearchIndex} annotation.
@@ -143,7 +146,7 @@ public class ElasticsearchIndexAnnotationTest {
         ClusterStateResponse response = adminClient.cluster().prepareState()
                 .execute().actionGet();
 
-        Settings indexSettings = response.getState().metaData().index("documents").settings();
+        Settings indexSettings = response.getState().metaData().index("documents").getSettings();
         assertEquals("3", indexSettings.get("index.number_of_shards"));
         assertEquals("7", indexSettings.get("index.number_of_replicas"));
         assertEquals("true", indexSettings.get("index.analysis.filter.test_word_delimiter.split_on_numerics"));

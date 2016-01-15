@@ -18,20 +18,20 @@
  */
 package com.github.tlrx.elasticsearch.test.request;
 
-import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
-import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
+import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 
 /**
  * A {@link Request} used to create indices.
@@ -54,7 +54,7 @@ public class CreateIndex implements Request<Void> {
     }
 
     public CreateIndex withSettings(String source) {
-        Settings settings = ImmutableSettings.settingsBuilder()
+        Settings settings = Settings.settingsBuilder()
                 .loadFromSource(source)
                 .build();
         withSettings(settings);
@@ -104,7 +104,7 @@ public class CreateIndex implements Request<Void> {
                 bulkRequestBuilder = client.prepareBulk();
                 for (JSONProvider jsonProvider : bulks) {
                     byte[] content = jsonProvider.toJson().getBytes("UTF-8");
-                    bulkRequestBuilder.add(content, 0, content.length, true);
+                    bulkRequestBuilder.add(content, 0, content.length);
                 }
             }
 

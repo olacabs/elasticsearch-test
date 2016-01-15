@@ -1,16 +1,23 @@
 package com.github.tlrx.elasticsearch.test.support.junit.runners;
 
-import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.*;
-import com.github.tlrx.elasticsearch.test.support.junit.rules.ElasticsearchClassRule;
-import com.github.tlrx.elasticsearch.test.support.junit.rules.ElasticsearchFieldRule;
-import com.github.tlrx.elasticsearch.test.support.junit.rules.ElasticsearchTestRule;
-import org.elasticsearch.common.netty.util.internal.ConcurrentHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.junit.rules.TestRule;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
 
-import java.util.List;
-import java.util.Map;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.ElasticsearchAdminClientAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.ElasticsearchBulkRequestAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.ElasticsearchClientAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.ElasticsearchIndexAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.ElasticsearchIndexesAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.ElasticsearchNodeAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations.ElasticsearchTransportClientAnnotationHandler;
+import com.github.tlrx.elasticsearch.test.support.junit.rules.ElasticsearchClassRule;
+import com.github.tlrx.elasticsearch.test.support.junit.rules.ElasticsearchFieldRule;
+import com.github.tlrx.elasticsearch.test.support.junit.rules.ElasticsearchTestRule;
 
 /**
  * JUnit Runner used to run test classes that have Elasticsearch annotations.

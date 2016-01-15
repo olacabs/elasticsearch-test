@@ -18,55 +18,68 @@
  */
 package com.github.tlrx.elasticsearch.test.provider;
 
-import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
-import org.elasticsearch.common.Preconditions;
-import org.elasticsearch.common.io.Streams;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.elasticsearch.common.io.Streams;
+
+import com.github.tlrx.elasticsearch.test.EsSetupRuntimeException;
+import com.google.common.base.Preconditions;
+
 /**
- * A ClassPathJSONProvider is able to load a file from the classpath and returns its content as a JSON String.
+ * A ClassPathJSONProvider is able to load a file from the classpath and returns
+ * its content as a JSON String.
  */
 public class ClassPathJSONProvider implements JSONProvider {
 
-    private Class klass;
-    private ClassLoader classLoader;
-    private String path;
+	private Class klass;
+	private ClassLoader classLoader;
+	private String path;
 
-    public ClassPathJSONProvider(ClassLoader classLoader, String path) {
-        Preconditions.checkNotNull(classLoader, "No ClassLoader specified");
-        this.classLoader = classLoader;
-        this.path = path;
-    }
+	public ClassPathJSONProvider(ClassLoader classLoader, String path) {
+		Preconditions.checkNotNull(classLoader, "No ClassLoader specified");
+		this.classLoader = classLoader;
+		this.path = path;
+	}
 
-    public ClassPathJSONProvider(Class klass, String path) {
-        Preconditions.checkNotNull(klass, "No Class specified");
-        this.klass = klass;
-        this.path = path;
-    }
+	public ClassPathJSONProvider(Class klass, String path) {
+		Preconditions.checkNotNull(klass, "No Class specified");
+		this.klass = klass;
+		this.path = path;
+	}
 
-    @Override
-    public String toJson() {
-        return toString();
-    }
+	@Override
+	public String toJson() {
+		return toString();
+	}
 
-    @Override
+	@Override
     public String toString() {
+		InputStream inputStream = null;
         try {
             if (klass != null) {
-                InputStream inputStream = klass.getResourceAsStream(path);
+                inputStream = klass.getResourceAsStream(path);
+            } else {
+            	inputStream = classLoader.getResourceAsStream(path);
+            }
                 if (inputStream == null) {
                     throw new FileNotFoundException("Resource [" + path + "] not found in classpath with class  [" + klass.getName() + "]");
                 }
-                return Streams.copyToString(new InputStreamReader(inputStream, "UTF-8"));
-            } else {
-                return Streams.copyToStringFromClasspath(classLoader, path);
-            }
+                String data = Streams.copyToString(new InputStreamReader(inputStream, "UTF-8"));
+                return data;
         } catch (IOException e) {
             throw new EsSetupRuntimeException(e);
+      
+        } finally {
+        	if (inputStream != null) {
+        		try {
+	                inputStream.close();
+              
+        		} catch (IOException e) {
+                }
+        	}
         }
     }
 }

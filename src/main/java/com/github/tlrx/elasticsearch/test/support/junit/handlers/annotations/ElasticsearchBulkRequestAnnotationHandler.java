@@ -3,16 +3,17 @@
  */
 package com.github.tlrx.elasticsearch.test.support.junit.handlers.annotations;
 
-import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchBulkRequest;
-import com.github.tlrx.elasticsearch.test.support.junit.handlers.MethodLevelElasticsearchAnnotationHandler;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.client.Client;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.client.Client;
+
+import com.github.tlrx.elasticsearch.test.annotations.ElasticsearchBulkRequest;
+import com.github.tlrx.elasticsearch.test.support.junit.handlers.MethodLevelElasticsearchAnnotationHandler;
 
 /**
  * Handle {@link ElasticsearchBulkRequest} annotation
@@ -59,7 +60,7 @@ public class ElasticsearchBulkRequestAnnotationHandler extends AbstractAnnotatio
 
             // Execute the BulkRequest
             BulkResponse response = client.prepareBulk()
-                    .add(buffer, 0, buffer.length, true, elasticsearchBulkRequest.defaultIndexName(), elasticsearchBulkRequest.defaultTypeName())
+                    .add(buffer, 0, buffer.length, elasticsearchBulkRequest.defaultIndexName(), elasticsearchBulkRequest.defaultTypeName())
                     .setRefresh(true)
                     .execute()
                     .actionGet();
